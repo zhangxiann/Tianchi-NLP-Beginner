@@ -19,7 +19,11 @@ categories:
 
 比赛地址：[https://tianchi.aliyun.com/competition/entrance/531810/introduction](https://tianchi.aliyun.com/competition/entrance/531810/introduction)
 
+数据可以通过上面的链接下载。
 
+其中还用到了训练好的词向量文件。
+
+词向量下载链接: https://pan.baidu.com/s/1ewlck3zwXVQuAzraZ26Euw 提取码: qbpr
 
 这篇文章中使用的模型主要是**CNN + LSTM + Attention**，主要学习的是**数据处理的完整流程，以及模型构建的完整流程**。虽然还没有使用 Bert 等方案，不过如果看完了这篇文章，理解了整个流程之后，即使你想要使用其他模型来处理，也能更快实现。
 
@@ -1106,8 +1110,8 @@ class Trainer():
 
         logging.info(
             '| epoch {:3d} | score {} | f1 {} | loss {:.4f} | time {:.2f}'.format(epoch, score, f1,
-                                                                                  overall_losses,
-        # 如果预测和真实的标签都包含相同的类别数目，才能调用 classification_report                                                                        during_time))
+                                                                                  overall_losses, during_time))
+        # 如果预测和真实的标签都包含相同的类别数目，才能调用 classification_report                                                                        
         if set(y_true) == set(y_pred) and self.report:
             report = classification_report(y_true, y_pred, digits=4, target_names=self.target_names)
             logging.info('\n' + report)
