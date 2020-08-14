@@ -75,7 +75,9 @@ Datawhale 提供的代码里包含了数据处理，以及从 0 到 1模型建�
    <div align="center"><img src="https://image.zhangxiann.com/20200814084354.png"/></div><br>
 然后根据`label2id`，把每一类别的数据，划分到 10 份数据中。
    
-<div align="center"><img src="https://image.zhangxiann.com/数据处理.gif"/></div><br>
+   <div align="center"><img src="https://image.zhangxiann.com/数据处理.gif"/></div><br>
+   
+   最终得到的数据`fold_data`是一个`list`，有 10 个元素，每个元素是 `dict`，包括 `label` 和 `text`的列表：`[{labels:textx}, {labels:textx}. . .]`。
 2. 最后，把前 9 份数据作为训练集`train_data`，最后一份数据作为验证集`dev_data`，并读取测试集`test_data`。
 
 
@@ -137,6 +139,8 @@ WordCNNEncoder 网络结构示意图如下：
 
 
 <div align="center"><img src="https://image.zhangxiann.com/20200814132200.png"/></div><br>
+
+
 #### 1. Embedding
 
 ` batch_inputs1, batch_inputs2`都输入到`WordCNNEncoder`。`WordCNNEncoder`包括两个`embedding`层，分别对应`batch_inputs1`，embedding 层是可学习的，得到`word_embed`；`batch_inputs2`，读取的是外部训练好的词向量，因此是不可学习的，得到`extword_embed`。所以会分别得到两个词向量，将 2 个词向量相加，得到最终的词向量`batch_embed`，形状是`(batch_size * doc_len, sent_len, 100)`，然后添加一个维度，变为`(batch_size * doc_len, 1, sent_len, 100)`，对应 Pytorch 里图像的`(B, C, H, W)`。
@@ -230,6 +234,8 @@ logging.info("Use cuda: %s, gpu id: %d.", use_cuda, gpu)
 
 
 ### 4.1.1 把数据分成  10 份
+
+数据会经过`all_data2fold`函数，这个函数的作用是把原始的 DataFrame 数据，转换为一个`list`，有 10 个元素，每个元素是 `dict`，包括 `label` 和 `text`的列表：`[{labels:textx}, {labels:textx}. . .]`。
 
 
 ```python
@@ -339,6 +345,8 @@ fold_data = all_data2fold(10)
 
 ### 4.1.2 拆分训练集、验证集，读取测试集
 
+把前 9 份数据作为训练集`train_data`，最后一份数据作为验证集`dev_data`，并读取测试集`test_data`。
+
 
 ```python
 # build train, dev, test data
@@ -367,6 +375,15 @@ test_data = {'label': [0] * len(texts), 'text': texts}
 
 
 ### 4.1.3创建 Vocab
+
+Vocab 的作用是：
+
+- 创建 词 和 `index` 对应的字典，这里包括 2 份字典，分别是：`_id2word` 和 `_id2extword`。
+- 其中 `_id2word` 是从新闻得到的， 把词频小于 5 的词替换为了 `UNK`。对应到模型输入的 `batch_inputs1`。
+- `_id2extword` 是从 `word2vec.txt` 中得到的，有 5976 个词。对应到模型输入的 `batch_inputs2`。
+- 后面会有两个 `embedding` 层，其中 `_id2word` 对应的 `embedding` 是可学习的，`_id2extword` 对应的 `embedding` 是从文件中加载的，是固定的。
+- 创建 label 和 index 对应的字典。
+- 上面这些字典，都是基于`train_data`创建的。
 
 
 ```python
@@ -502,6 +519,12 @@ vocab = Vocab(train_data)
 
 ### 4.2.1 定义 Attention
 
+`Attention`的输入是`sent_hiddens`和`sent_masks`。在`Attention`里，`sent_hiddens`首先经过线性变化得到`key`，维度不变，依然是`(batch_size , doc_len, 512)`。
+
+然后`key`和`query`相乘，得到`outputs`。`query`的维度是`512`，因此`output`的维度是`(batch_size , doc_len)`，这个就是我们需要的`attention`，表示分配到每个句子的权重。下一步需要对这个`attetion`做`softmax`，并使用`sent_masks`，把没有单词的句子的权重置为`-1e32`，得到`masked_attn_scores`。
+
+最后把`masked_attn_scores`和`key`相乘，得到`batch_outputs`，形状是`(batch_size, 512)`。
+
 
 ```python
 # build module
@@ -557,7 +580,26 @@ class Attention(nn.Module):
 ### 4.2.2 定义 WordCNNEncoder
 
 
+
+#### 1. Embedding
+
+`batch_inputs1, batch_inputs2`都输入到`WordCNNEncoder`。`WordCNNEncoder`包括两个`embedding`层，分别对应`batch_inputs1`，embedding 层是可学习的，得到`word_embed`；`batch_inputs2`，读取的是外部训练好的词向，因此是不可学习的，得到`extword_embed`。所以会分别得到两个词向量，将 2 个词向量相加，得到最终的词向量`batch_embed`，形状是`(batch_size * doc_len, sent_len, 100)`，然后添加一个维度，变为`(batch_size * doc_len, 1, sent_len, 100)`，对应 Pytorch 里图像的`(B, C, H, W)`。
+
+
+
+#### 2. CNN
+
+然后，分别定义 3 个卷积核，output channel 都是 100 维。
+
+第一个卷积核大小为`[2,100]`，得到的输出是`(batch_size * doc_len, 100， sent_len-2+1, 1)`，定义一个池化层大小为`[sent_len-2+1, 1]`，最终得到输出经过`squeeze()`的形状是`(batch_size * doc_len, 100)`。
+
+同理，第 2 个卷积核大小为`[3,100]`，第 3 个卷积核大小为`[4,100]`。卷积+池化得到的输出形状也是`(batch_size * doc_len, 100)`。
+
+最后，将这 3 个向量在第 2 个维度上做拼接，得到输出的形状是`(batch_size * doc_len, 300)`。
+
+
 ```python
+# 读取训练好的词向量文件
 word2vec_path = '../emb/word2vec.txt'
 dropout = 0.15
 ```
@@ -644,6 +686,8 @@ class WordCNNEncoder(nn.Module):
 
 ### 4.2.3 定义 SentEncoder
 
+`SentEncoder`包含了 2 层的双向 LSTM，输入数据`sent_reps`的形状是`(batch_size , doc_len, 300)`，LSTM 的 hidden_size 为 256，由于是双向的，经过 LSTM 后的数据维度是`(batch_size , doc_len, 512)`，然后和 mask 按位置相乘，把没有单词的句子的位置改为 0，最后输出的数据`sent_hiddens`，维度依然是`(batch_size , doc_len, 512)`。
+
 
 ```python
 # build sent encoder
@@ -681,7 +725,7 @@ class SentEncoder(nn.Module):
 
 
 
-### 4.2.4 定义整个模型Attention
+### 4.2.4 定义整个模型
 
 把 WordCNNEncoder、SentEncoder、Attention、FC 全部连接起来
 
@@ -762,6 +806,8 @@ model = Model(vocab)
 
 ### 4.2.5 定义 Optimizer
 
+这部分比较容易理解，就是把所有的参数都添加到`Optimizer`里，定义一些辅助函数。
+
 
 ```python
 # build optimizer
@@ -812,6 +858,8 @@ class Optimizer:
 
 ### 4.2.6定义 sentence_split，把文章划分为句子
 
+输入的`text`表示一篇新闻，最后返回的 segments 是一个list，其中每个元素是 tuple：(句子长度，句子本身)。
+
 
 ```python
 # 
@@ -853,7 +901,9 @@ def sentence_split(text, vocab, max_sent_len=256, max_segment=16):
 
 ### 4.2.7 定义 get_examples
 
-里面调用 sentence_split
+遍历每一篇新闻，对每篇新闻都调用`sentence_split`来分割句子。
+
+最后返回的数据是一个 list，每个元素是一个 tuple: (label, 句子数量，doc)。其中 doc 又是一个 list，每个 元素是一个 tuple: (句子长度，word_ids, extword_ids)。
 
 
 ```python
@@ -884,7 +934,9 @@ def get_examples(data, vocab, max_sent_len=256, max_segment=8):
 
 
 
-### 4.2.8定义 batch_slice
+### 4.2.8 定义 batch_slice
+
+把数据分割为多个 batch，组成一个 list 并返回
 
 
 ```python
@@ -907,7 +959,7 @@ def batch_slice(data, batch_size):
 
 ### 4.2.9 定义 data_iter
 
-里面调用 batch_slice
+在迭代训练时，调用`data_iter`函数，生成每一批的`batch_data`。而`data_iter`函数里面会调用`batch_slice`函数。
 
 
 ```python
@@ -970,7 +1022,11 @@ def reformat(num, n):
 
 ### 4.2.11 定义训练和测试的方法
 
-包括 batch2tensor
+比较难看懂的是`batch2tensor`函数。`batch2tensor`函数最后返回的数据是：`(batch_inputs1, batch_inputs2, batch_masks), batch_labels`。形状都是`(batch_size, doc_len, sent_len)`。`doc_len`表示每篇新闻有几乎话，`sent_len`表示每句话有多少个单词。
+
+`batch_masks`在有单词的位置，值为1，其他地方为 0，用于后面计算 Attention，把那些没有单词的位置的 attention 改为 0。
+
+`batch_inputs1, batch_inputs2, batch_masks`，形状是`(batch_size, doc_len, sent_len)`，转换为`(batch_size * doc_len, sent_len)`。
 
 
 ```python
@@ -1210,11 +1266,6 @@ class Trainer():
 
         return (batch_inputs1, batch_inputs2, batch_masks), batch_labels
 ```
-
-
-
-
-    2
 
 
 
