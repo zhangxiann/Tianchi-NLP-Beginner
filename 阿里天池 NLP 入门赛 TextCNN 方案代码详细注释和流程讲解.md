@@ -1,17 +1,50 @@
-# 为什么写篇文章
+---
+thumbnail: https://image.zhangxiann.com/jung-ho-park-HbnqEhMBpPM-unsplash.jpg
+toc: true
+date: 2020/8/11 12:40:20
+disqusId: zhangxian
+categories:
+- 数据竞赛
+---
+
+
+
+# 前言
+
+这篇文章用于记录阿里天池 NLP 入门赛，详细讲解了整个数据处理流程，以及如何从零构建一个模型，适合新手入门。
+
+赛题以新闻数据为赛题数据，数据集报名后可见并可下载。赛题数据为新闻文本，并按照字符级别进行匿名处理。整合划分出14个候选分类类别：财经、彩票、房产、股票、家居、教育、科技、社会、时尚、时政、体育、星座、游戏、娱乐的文本数据。实质上是一个 14 分类问题。
+
+赛题数据由以下几个部分构成：训练集20w条样本，测试集A包括5w条样本，测试集B包括5w条样本。
+
+比赛地址：[https://tianchi.aliyun.com/competition/entrance/531810/introduction](https://tianchi.aliyun.com/competition/entrance/531810/introduction)
+
+
+
+这篇文章中使用的模型主要是**CNN + LSTM + Attention**，主要学习的是**数据处理的完整流程，以及模型构建的完整流程**。虽然还没有使用 Bert 等方案，不过如果看完了这篇文章，理解了整个流程之后，即使你想要使用其他模型来处理，也能更快实现。
+
+<!--more-->
+
+
+
+# 1. 为什么写篇文章
 
 首先，这篇文章的代码全部都来源于 Datawhale 提供的开源代码，我添加了自己的笔记，帮助新手更好地理解这个代码。
 
-这份代码里包含了数据处理，以及从 0 到 1模型建立的完整流程。
-
-这份代码和前面提供的 basesline 的都不太一样，它包含了非常多数据处理的细节，模型也是由 3 个部分构成，所以看起来难度陡然上升。
-
-其次，代码里的注释非常少，也没有讲解整个模型的整体流程。
-
-这份代码其中很多数据转换的逻辑，和 3 个模型的连接，对于**新手**来说，颇为头痛。
-我自己也是一个新人，花了一天的时间，仔细研究数据在一种每一个步骤的转化，对于一些难以理解的代码，在钉钉群里询问之后，也得到了Datawhale 成员的热心解答。最终才搞懂这个代码。
 
 
+## 1.1 Datawhale 提供的代码有哪些需要改进？
+
+Datawhale 提供的代码里包含了数据处理，以及从 0 到 1模型建立的完整流程。但是和前面提供的 basesline 的都不太一样，它包含了非常多数据处理的细节，模型也是由 3 个部分构成，所以看起来难度陡然上升。
+
+其次，代码里的注释非常少，也没有讲解整个数据处理和网络的整体流程。这些对于**新手**来说，增加了理解的门槛。
+在数据竞赛方面，我也是一个新人，花了一天的时间，仔细研究数据在一种每一个步骤的转化，对于一些难以理解的代码，在群里询问之后，也得到了 Datawhale 成员的热心解答。最终才明白了全部的代码。
+
+
+
+
+
+## 1.2 我做了什么改进？
 
 所以，为了减少对于新手的阅读难度，我添加了一些内容。
 
@@ -19,51 +52,50 @@
 
    因为代码**不是从上到下顺序阅读**的。因此，更容易让人理解的做法是：先从整体上给出宏观的数据转换流程图，其中要包括数据在每一步的 shape，以及包含的转换步骤，让读者心中有一个框架图，再带着这个框架图去看细节，会更加了然于胸。
 
-2. 其次，了解了整体流程之外，在真正的细节代码里，读者可能还是会看不懂某一段小逻辑。因此，我在原有代码的基础之上增添了许多**注释**，以降低代码的理解门槛。
+2. 其次，除了了解了整体流程，在真正的代码细节里，读者可能还是会看不懂某一段小逻辑。因此，我在原有代码的基础之上增添了许多**注释**，以降低代码的理解门槛。
 
 
 
-# 数据处理
+# 2. 数据处理
 
 
 
-## 数据拆分为 10 份
+## 2.1 数据拆分为 10 份
 
-1. 数据首先会经过`all_data2fold`函数，这个函数的作用是把原始的 DataFrame 数据，转换为一个`list`，有 10 个元素，表示交叉验证里的 10 份，每个元素是 dict，每个 dict 包括 label 和 text。
+1. 数据首先会经过`all_data2fold`函数，这个函数的作用是把原始的 DataFrame 数据，转换为一个`list`，有 10 个元素，表示交叉验证里的 10 份，每个元素是 `dict`，每个`dict`包括 `label` 和 `text`。
 
-   首先根据 label 来划分数据行所在 index, 生成 label2id。
+   首先根据 `label` 来划分数据行所在 `index`, 生成 `label2id`。
 
-   label2id 是一个 dict，key 为 label，value 是一个 list，存储的是该类对应的 index
+   `label2id` 是一个 `dict`，`key` 为 `label`，`value` 是一个 `list`，存储的是该类对应的 `index`。
 
    <div align="center"><img src="https://image.zhangxiann.com/20200814084354.png"/></div><br>
 然后根据`label2id`，把每一类别的数据，划分到 10 份数据中。
    
 <div align="center"><img src="https://image.zhangxiann.com/数据处理.gif"/></div><br>
-   
 2. 最后，把前 9 份数据作为训练集`train_data`，最后一份数据作为验证集`dev_data`，并读取测试集`test_data`。
 
 
 
-## 定义并创建 Vacab
+## 2.2 定义并创建 Vacab
 
 Vocab 的作用是：
 
 - 创建 词 和 `index` 对应的字典，这里包括 2 份字典，分别是：`_id2word` 和 `_id2extword`。
 - 其中 `_id2word` 是从新闻得到的， 把词频小于 5 的词替换为了 `UNK`。对应到模型输入的 `batch_inputs1`。
-- `_id2extword` 是从 `word2vec.txt` 中得到的，有 5976 个词。对应到模型输入的 batch_inputs2。
+- `_id2extword` 是从 `word2vec.txt` 中得到的，有 5976 个词。对应到模型输入的 `batch_inputs2`。
 - 后面会有两个 `embedding` 层，其中 `_id2word` 对应的 `embedding` 是可学习的，`_id2extword` 对应的 `embedding` 是从文件中加载的，是固定的。
 - 创建 label 和 index 对应的字典。
 - 上面这些字典，都是基于`train_data`创建的。
 
 
 
-# 模型
+# 3. 模型
 
 
 
-## 把文章分割为句子
+## 3.1 把文章分割为句子
 
-1. 上上一步得到的 3 个数据，都是一个`list`，`list`里的每个元素是 dict，每个 dict 包括 label 和 text。这 3 个数据会经过 `get_examples`函数。 `get_examples`函数里，会调用`sentence_split`函数，把每一篇文章分割成为句子。
+1. 上上一步得到的 3 个数据，都是一个`list`，`list`里的每个元素是 dict，每个 dict 包括 `label` 和 `text`。这 3 个数据会经过 `get_examples`函数。 `get_examples`函数里，会调用`sentence_split`函数，把每一篇文章分割成为句子。
 
    然后，根据`vocab`，把 word 转换为对应的索引，这里使用了 2 个字典，转换为 2 份索引，分别是：`word_ids`和`extword_ids`。最后返回的数据是一个 list，每个元素是一个 tuple: `(label, 句子数量，doc)`。其中`doc`又是一个 list，每个 元素是一个 tuple: `(句子长度，word_ids, extword_ids)`。
 
@@ -75,7 +107,7 @@ Vocab 的作用是：
 
 
 
-## 生成训练数据
+## 3.2 生成训练数据
 
 
 
@@ -89,24 +121,18 @@ Vocab 的作用是：
 
 
 
-## 网络部分
+## 3.3 网络部分
 
 下面，终于来到网络部分。模型结构图如下：
 
 <div align="center"><img src="https://image.zhangxiann.com/20200814132004.png"/></div><br>
-
-
-
-
-### WordCNNEncoder
+### 3.3.1 WordCNNEncoder
 
 WordCNNEncoder 网络结构示意图如下：
 
 
 
 <div align="center"><img src="https://image.zhangxiann.com/20200814132200.png"/></div><br>
-
-
 #### 1. Embedding
 
 ` batch_inputs1, batch_inputs2`都输入到`WordCNNEncoder`。`WordCNNEncoder`包括两个`embedding`层，分别对应`batch_inputs1`，embedding 层是可学习的，得到`word_embed`；`batch_inputs2`，读取的是外部训练好的词向，因此是不可学习的，得到`extword_embed`。所以会分别得到两个词向量，将 2 个词向量相加，得到最终的词向量`batch_embed`，形状是`(batch_size * doc_len, sent_len, 100)`，然后添加一个维度，变为`(batch_size * doc_len, 1, sent_len, 100)`，对应 Pytorch 里图像的`(B, C, H, W)`。
@@ -125,7 +151,7 @@ WordCNNEncoder 网络结构示意图如下：
 
 
 
-### shape 转换
+### 3.3.2 shape 转换
 
 把上一步得到的数据的形状，转换为`(batch_size , doc_len, 300)`名字是`sent_reps`。然后，对`mask`进行处理。
 
@@ -133,20 +159,16 @@ WordCNNEncoder 网络结构示意图如下：
 
 
 
-### SentEncoder
+### 3.3.3 SentEncoder
 
 SentEncoder 网络结构示意图如下：
 
 <div align="center"><img src="https://image.zhangxiann.com/20200814145134.png"/></div><br>
-
-
-
-
 `SentEncoder`包含了 2 层的双向 LSTM，输入数据`sent_reps`的形状是`(batch_size , doc_len, 300)`，LSTM 的 hidden_size 为 256，由于是双向的，经过 LSTM  后的数据维度是`(batch_size , doc_len, 512)`，然后和 mask 按位置相乘，把没有单词的句子的位置改为 0，最后输出的数据`sent_hiddens`，维度依然是`(batch_size , doc_len, 512)`。
 
 
 
-### Attention
+### 3.3.4 Attention
 
 接着，经过`Attention`。`Attention`的输入是`sent_hiddens`和`sent_masks`。在`Attention`里，`sent_hiddens`首先经过线性变化得到`key`，维度不变，依然是`(batch_size , doc_len, 512)`。
 
@@ -156,7 +178,7 @@ SentEncoder 网络结构示意图如下：
 
 
 
-### FC
+### 3.3.5 FC
 
 最后经过`FC`层，得到分类概率的向量。
 
@@ -164,11 +186,11 @@ SentEncoder 网络结构示意图如下：
 
 
 
-# 完整代码+注释
+# 4. 完整代码+注释
 
 
 
-## 数据处理
+## 4.1 数据处理
 
 导入包
 
@@ -202,7 +224,8 @@ logging.info("Use cuda: %s, gpu id: %d.", use_cuda, gpu)
     2020-08-13 17:12:16,510 INFO: Use cuda: False, gpu id: 0.
 
 
-### 把数据分成  10 份
+
+### 4.1.1 把数据分成  10 份
 
 
 ```python
@@ -309,7 +332,8 @@ fold_data = all_data2fold(10)
     2020-08-13 17:12:45,012 INFO: Fold lens [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
 
 
-### 拆分训练集、验证集，读取测试集
+
+### 4.1.2 拆分训练集、验证集，读取测试集
 
 
 ```python
@@ -336,7 +360,9 @@ texts = f['text'].tolist()
 test_data = {'label': [0] * len(texts), 'text': texts}
 ```
 
-### 创建 Vocab
+
+
+### 4.1.3创建 Vocab
 
 
 ```python
@@ -466,9 +492,11 @@ vocab = Vocab(train_data)
 
 
 
-## 模型
+## 4.2 模型
 
-### 定义 Attention
+
+
+### 4.2.1 定义 Attention
 
 
 ```python
@@ -520,7 +548,9 @@ class Attention(nn.Module):
         return batch_outputs, attn_scores
 ```
 
-### 定义 WordCNNEncoder
+
+
+### 4.2.2 定义 WordCNNEncoder
 
 
 ```python
@@ -606,7 +636,9 @@ class WordCNNEncoder(nn.Module):
         return reps
 ```
 
-### 定义 SentEncoder
+
+
+### 4.2.3 定义 SentEncoder
 
 
 ```python
@@ -643,7 +675,10 @@ class SentEncoder(nn.Module):
         return sent_hiddens
 ```
 
-### 定义整个模型Attention
+
+
+### 4.2.4 定义整个模型Attention
+
 把 WordCNNEncoder、SentEncoder、Attention、FC 全部连接起来
 
 
@@ -719,7 +754,9 @@ class Model(nn.Module):
 model = Model(vocab)
 ```
 
-### 定义 Optimizer
+
+
+### 4.2.5 定义 Optimizer
 
 
 ```python
@@ -767,7 +804,9 @@ class Optimizer:
         return res
 ```
 
-### 定义 sentence_split，把文章划分为句子
+
+
+### 4.2.6定义 sentence_split，把文章划分为句子
 
 
 ```python
@@ -806,7 +845,10 @@ def sentence_split(text, vocab, max_sent_len=256, max_segment=16):
         return segments
 ```
 
-### 定义 get_examples
+
+
+### 4.2.7 定义 get_examples
+
 里面调用 sentence_split
 
 
@@ -836,7 +878,9 @@ def get_examples(data, vocab, max_sent_len=256, max_segment=8):
     return examples
 ```
 
-### 定义 batch_slice
+
+
+### 4.2.8定义 batch_slice
 
 
 ```python
@@ -855,7 +899,10 @@ def batch_slice(data, batch_size):
 
 ```
 
-### 定义 data_iter
+
+
+### 4.2.9 定义 data_iter
+
 里面调用 batch_slice
 
 
@@ -891,7 +938,9 @@ def data_iter(data, batch_size, shuffle=True, noise=1.0):
         yield batch
 ```
 
-### 定义指标计算
+
+
+### 4.2.10 定义指标计算
 
 
 ```python
@@ -913,7 +962,10 @@ def reformat(num, n):
     return float(format(num, '0.' + str(n) + 'f'))
 ```
 
-### 定义训练和测试的方法
+
+
+### 4.2.11 定义训练和测试的方法
+
 包括 batch2tensor
 
 
@@ -1174,3 +1226,18 @@ trainer.train()
 # test
 trainer.test()
 ```
+
+
+
+至此，整个流程就讲解完了。希望对你有所帮助。
+
+
+
+<br>
+
+如果你觉得这篇文章对你有帮助，不妨点个赞，让我有更多动力写出好文章。
+<br>
+
+我的文章会首发在公众号上，欢迎扫码关注我的公众号**张贤同学**。
+
+<div align="center"><img src="https://image.zhangxiann.com/QRcode_8cm.jpg"/></div><br>
