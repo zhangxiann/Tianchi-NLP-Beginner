@@ -111,7 +111,7 @@ Vocab 的作用是：
 
 
 
-`batch2tensor`函数最后返回的数据是：`(batch_inputs1, batch_inputs2, batch_masks), batch_labels`。形状都是`(batch_size, doc_len, sent_len)`。`doc_len`表示每篇新闻有几乎话，`sent_len`表示每句话有多少个单词。
+`batch2tensor`函数最后返回的数据是：`(batch_inputs1, batch_inputs2, batch_masks), batch_labels`。形状都是`(batch_size, doc_len, sent_len)`。`doc_len`表示每篇新闻有几句话，`sent_len`表示每句话有多少个单词。
 
 `batch_masks`在有单词的位置，值为1，其他地方为 0，用于后面计算 Attention，把那些没有单词的位置的 attention 改为 0。
 
@@ -135,7 +135,7 @@ WordCNNEncoder 网络结构示意图如下：
 <div align="center"><img src="https://image.zhangxiann.com/20200814132200.png"/></div><br>
 #### 1. Embedding
 
-` batch_inputs1, batch_inputs2`都输入到`WordCNNEncoder`。`WordCNNEncoder`包括两个`embedding`层，分别对应`batch_inputs1`，embedding 层是可学习的，得到`word_embed`；`batch_inputs2`，读取的是外部训练好的词向，因此是不可学习的，得到`extword_embed`。所以会分别得到两个词向量，将 2 个词向量相加，得到最终的词向量`batch_embed`，形状是`(batch_size * doc_len, sent_len, 100)`，然后添加一个维度，变为`(batch_size * doc_len, 1, sent_len, 100)`，对应 Pytorch 里图像的`(B, C, H, W)`。
+` batch_inputs1, batch_inputs2`都输入到`WordCNNEncoder`。`WordCNNEncoder`包括两个`embedding`层，分别对应`batch_inputs1`，embedding 层是可学习的，得到`word_embed`；`batch_inputs2`，读取的是外部训练好的词向量，因此是不可学习的，得到`extword_embed`。所以会分别得到两个词向量，将 2 个词向量相加，得到最终的词向量`batch_embed`，形状是`(batch_size * doc_len, sent_len, 100)`，然后添加一个维度，变为`(batch_size * doc_len, 1, sent_len, 100)`，对应 Pytorch 里图像的`(B, C, H, W)`。
 
 
 
