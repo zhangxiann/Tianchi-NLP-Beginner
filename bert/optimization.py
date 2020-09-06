@@ -85,7 +85,7 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, use_tpu):
     return train_op
 
 
-class AdamWeightDecayOptimizer(tf.compat.v1.train.Optimizer):
+class AdamWeightDecayOptimizer(tf.train.Optimizer):
     """A basic Adam optimizer that includes "correct" L2 weight decay."""
 
     def __init__(self,

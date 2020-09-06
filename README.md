@@ -22,23 +22,21 @@
 	
 	
 	
-1.2 运行`create_vocab.py`，创建字典
-	
+
+    1.2 运行`create_vocab.py`，创建字典
 	```
 	python create_vocab.py
 	```
-	
-	
-
 
 2. **对数据进行 MASK**
-    
+   
     ```
       bash create_pretraining_data.sh
-```
+    ```
+
     
 3. **开始训练 Bert**
-    ```
+	```
       bash run_pretraining.sh
     ```
 
