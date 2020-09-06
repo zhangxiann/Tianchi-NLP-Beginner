@@ -1,0 +1,2 @@
+export BERT_BASE_DIR=./bert-mini
+python convert_checkpoint.py --bert_config_file $BERT_BASE_DIR/bert_config.json  --tf_checkpoint $BERT_BASE_DIR/model.ckpt-100000 --bert_config_file $BERT_BASE_DIR/bert_config.json --pytorch_dump_path $BERT_BASE_DIR/pytorch_model.bin
