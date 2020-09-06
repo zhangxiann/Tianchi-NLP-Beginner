@@ -1,3 +1,5 @@
+mkdir create
+
 nohup python create_pretraining_data.py --input_file=./data/train_0 --output_file=./records/train_0.tfrecord --vocab_file=./bert-mini/vocab.txt --max_seq_length=256 --max_predictions_per_seq=32 --do_lower_case=True --masked_lm_prob=0.15 --random_seed=12345 --dupe_factor=5> create/0.log 2>&1 &
 
 nohup python create_pretraining_data.py --input_file=./data/train_1 --output_file=./records/train_1.tfrecord --vocab_file=./bert-mini/vocab.txt --max_seq_length=256 --max_predictions_per_seq=32 --do_lower_case=True --masked_lm_prob=0.15 --random_seed=12345 --dupe_factor=5> create/1.log 2>&1 &
