@@ -14,7 +14,7 @@
 
   1. **数据准备**
 
-      1.1 首先把训练数据 `train_set.csv` 和测试数据  `test_a.csv` 放到 `bert/data` 文件夹，运行 `prepare_data.py`，把文本数据放到一个文件中，每篇文章之间使用空行分隔
+      1.1 首先在 `bert` 文件夹里创建 `data` 文件夹，把训练数据 `train_set.csv` 和测试数据  `test_a.csv` 放到 `bert/data` 文件夹。运行 `prepare_data.py`，把文本数据放到一个文件中，每篇文章之间使用空行分隔
     ```
       python prepare_data.py
     ```
