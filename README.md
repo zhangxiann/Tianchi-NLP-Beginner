@@ -6,10 +6,7 @@
 
 
 
-包括 2 个分支：
 
-- master：使用 tensorflow 1.x
-- tensorflow2：使用 tensorflow 2.x
 
 
 
@@ -26,6 +23,8 @@
 ## bert
 
 使用 Bert 模型的代码。讲解文章：[阿里天池 NLP 入门赛 Bert 方案代码流程讲解](https://zhuanlan.zhihu.com/p/219698336)。
+
+tensorflow 版本是 1.x。
 
 包括 Bert 预训练和微调 Bert 两大步，具体步骤如下：
 
