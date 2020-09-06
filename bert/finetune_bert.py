@@ -15,7 +15,7 @@ import torch
 import logging
 import os.path as osp
 logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(levelname)s: %(message)s', filename='output.log')
-dir="../"
+dir="data/"
 # set seed 
 seed = 666
 random.seed(seed)
