@@ -15,11 +15,19 @@
 
 包括 2 个文件夹：
 
-- textcnn：使用 TextCNN 模型的代码。讲解文章：[阿里天池 NLP 入门赛 TextCNN 方案流程讲解](https://zhuanlan.zhihu.com/p/183862056)
+## textcnn
 
-- bert：使用 Bert 模型的代码。讲解文章：[阿里天池 NLP 入门赛 Bert 方案代码流程讲解](https://zhuanlan.zhihu.com/p/219698336)。
+使用 TextCNN 模型的代码。讲解文章：[阿里天池 NLP 入门赛 TextCNN 方案流程讲解](https://zhuanlan.zhihu.com/p/183862056)
 
-  包括 Bert 预训练和微调 Bert 两大步，具体步骤如下：
+
+
+
+
+## bert
+
+使用 Bert 模型的代码。讲解文章：[阿里天池 NLP 入门赛 Bert 方案代码流程讲解](https://zhuanlan.zhihu.com/p/219698336)。
+
+包括 Bert 预训练和微调 Bert 两大步，具体步骤如下：
 
 1. **数据准备**
 
