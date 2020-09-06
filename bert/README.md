@@ -8,6 +8,10 @@
 
 
 
+包括 2 个分支：
+
+- master：使用 tensorflow 1.x
+- tensorflow2：使用 tensorflow 2.x
 
 
 

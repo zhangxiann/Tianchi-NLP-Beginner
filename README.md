@@ -4,6 +4,15 @@
 
 因此，为了减少对于新手的阅读难度，我添加了一些内容。包括**数据处理**和**模型**，以及详细的代码注释，希望能帮助到有需要的人。
 
+
+
+包括 2 个分支：
+
+- master：使用 tensorflow 1.x
+- tensorflow2：使用 tensorflow 2.x
+
+
+
 包括 2 个文件夹：
 
 - textcnn：使用 TextCNN 模型的代码。讲解文章：[阿里天池 NLP 入门赛 TextCNN 方案流程讲解](https://zhuanlan.zhihu.com/p/183862056)
@@ -34,11 +43,10 @@
       bash create_pretraining_data.sh
     ```
 
-    
 3. **开始训练 Bert**
 	```
       bash run_pretraining.sh
-    ```
+   ```
 
 4. **把 Tensorflow 的模型，转换为 PyTorch 的模型**
     ```
