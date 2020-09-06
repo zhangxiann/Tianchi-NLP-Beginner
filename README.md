@@ -8,7 +8,7 @@
 
 - textcnn：使用 TextCNN 模型的代码。讲解文章：[阿里天池 NLP 入门赛 TextCNN 方案流程讲解](https://zhuanlan.zhihu.com/p/183862056)
 
-- bert：使用 Bert 模型的代码。讲解文章：[阿里天池 NLP 入门赛 Bert 方案代码流程讲解]()。
+- bert：使用 Bert 模型的代码。讲解文章：[阿里天池 NLP 入门赛 Bert 方案代码流程讲解](https://zhuanlan.zhihu.com/p/219698336)。
 
   包括 Bert 预训练和微调 Bert 两大步，具体步骤如下：
 
@@ -17,7 +17,7 @@
       1.1 首先运行 `prepare_data.py`，把文本数据放到一个文件中，每篇文章之间使用空行分隔
     ```
       python prepare_data.py
-      ```
+    ```
   
     1.2 运行`create_vocab.py`，创建字典
       ```
