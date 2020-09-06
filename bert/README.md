@@ -1,4 +1,14 @@
-这份代码使用 Bert 预训练新闻数据，详细的代码讲解，请查看[]()
+这份代码使用 Bert 预训练新闻数据，详细的代码讲解，请查看下面 3 篇文章。
+
+
+
+- [数据预处理](https://zhuanlan.zhihu.com/p/219698336)
+- [Bert 源码讲解](https://zhuanlan.zhihu.com/p/219710200)
+- [Bert 预训练与分类](https://zhuanlan.zhihu.com/p/219718670)
+
+
+
+
 
 
 步骤如下：
