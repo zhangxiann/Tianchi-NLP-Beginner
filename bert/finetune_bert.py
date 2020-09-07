@@ -318,7 +318,7 @@ class WhitespaceTokenizer():
     """WhitespaceTokenizer with vocab."""
 
     def __init__(self):
-        vocab_file = bert_path + 'vocab.txt'
+        vocab_file = osp.join(bert_path, 'vocab.txt')
         self._token2id = self.load_vocab(vocab_file)
         # 构造从 id 到 token 的映射
         self._id2token = {v: k for k, v in self._token2id.items()}
@@ -359,7 +359,7 @@ class WhitespaceTokenizer():
 
 
 # build word encoder
-bert_path = osp.join(dir,'./bert/bert-mini/')
+bert_path = 'bert-mini'
 dropout = 0.15
 
 from transformers import BertModel
@@ -755,8 +755,8 @@ log_interval = 1
 test_batch_size = 1
 train_batch_size = 1
 
-save_model = osp.join(dir,'./cnn0.bin')
-save_test = osp.join(dir,'./cnn0.csv')
+save_model = osp.join(dir,'./finetune_bert.bin')
+save_test = osp.join(dir,'./test_result.csv')
 
 class Trainer():
     def __init__(self, model, vocab):
