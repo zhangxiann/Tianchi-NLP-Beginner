@@ -24,14 +24,14 @@ torch.cuda.manual_seed(seed)
 torch.manual_seed(seed)
 
 # set cuda
-gpu = 1
-use_cuda = gpu >= 0 and torch.cuda.is_available()
+use_cuda = torch.cuda.is_available()
 if use_cuda:
-    torch.cuda.set_device(gpu)
+    # torch.cuda.set_device(gpu)
     device = torch.device("cuda", gpu)
 else:
     device = torch.device("cpu")
-logging.info("Use cuda: %s, gpu id: %d.", use_cuda, gpu)
+	
+logging.info("Use cuda: %s.", use_cuda)
 
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -761,7 +761,7 @@ save_test = osp.join(dir,'./test_result.csv')
 class Trainer():
     def __init__(self, model, vocab):
 
-        self.model = nn.DataParallel(model)
+        self.model = nn.DataParallel(model,device_ids=[0,1])
         self.report = True
 
         # get_examples() 返回的结果是 一个 list
