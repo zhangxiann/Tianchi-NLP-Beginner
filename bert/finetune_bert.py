@@ -752,8 +752,8 @@ epochs = 17
 early_stops = 3
 log_interval = 1
 
-test_batch_size = 1
-train_batch_size = 1
+test_batch_size = 256
+train_batch_size = 256
 
 save_model = osp.join(dir,'./finetune_bert.bin')
 save_test = osp.join(dir,'./test_result.csv')
