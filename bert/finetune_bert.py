@@ -33,8 +33,8 @@ else:
     device = torch.device("cpu")
 logging.info("Use cuda: %s, gpu id: %d.", use_cuda, gpu)
 
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+# import os
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 # ### 把数据分成  10 份
@@ -760,7 +760,8 @@ save_test = osp.join(dir,'./test_result.csv')
 
 class Trainer():
     def __init__(self, model, vocab):
-        self.model = model
+
+        self.model = nn.DataParallel(model)
         self.report = True
 
         # get_examples() 返回的结果是 一个 list
