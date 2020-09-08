@@ -26,8 +26,8 @@ torch.manual_seed(seed)
 # set cuda
 use_cuda = torch.cuda.is_available()
 if use_cuda:
-    # torch.cuda.set_device(gpu)
-    device = torch.device("cuda", gpu)
+    torch.cuda.set_device(gpu)
+    # device = torch.device("cuda", gpu)
 else:
     device = torch.device("cpu")
 	
