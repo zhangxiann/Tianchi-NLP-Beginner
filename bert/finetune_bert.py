@@ -484,7 +484,7 @@ class Model(nn.Module):
         parameters.extend(list(filter(lambda p: p.requires_grad, self.out.parameters())))
 
         if use_cuda:
-            self.to(device)
+            self.to(f'cuda:{model.device_ids[0]}')
 
         if len(parameters) > 0:
             self.all_parameters["basic_parameters"] = parameters
@@ -970,10 +970,10 @@ class Trainer():
                     batch_masks[b, sent_idx, word_idx] = 1
 
         if use_cuda:
-            batch_inputs1 = batch_inputs1.to(device)
-            token_type_ids = token_type_ids.to(device)
-            batch_masks = batch_masks.to(device)
-            batch_labels = batch_labels.to(device)
+            batch_inputs1 = batch_inputs1.to(f'cuda:{model.device_ids[0]}')
+            token_type_ids = token_type_ids.to(f'cuda:{model.device_ids[0]}')
+            batch_masks = batch_masks.to(f'cuda:{model.device_ids[0]}')
+            batch_labels = batch_labels.to(f'cuda:{model.device_ids[0]}')
 
         return (batch_inputs1, token_type_ids, batch_masks), batch_labels
 
