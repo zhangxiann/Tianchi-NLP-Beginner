@@ -22,7 +22,15 @@
 
 ## bert
 
-使用 Bert 模型的代码。讲解文章：[阿里天池 NLP 入门赛 Bert 方案代码流程讲解](https://zhuanlan.zhihu.com/p/219698336)。
+使用 Bert 模型的代码。讲解文章分为 3 篇：
+
+- [阿里天池 NLP 入门赛 Bert 方案 -1 数据预处理](https://zhuanlan.zhihu.com/p/219698336)
+- [阿里天池 NLP 入门赛 Bert 方案 -2 Bert 源码讲解](https://zhuanlan.zhihu.com/p/219710200)
+- [阿里天池 NLP 入门赛 Bert 方案 -3 Bert 预训练与分类](https://zhuanlan.zhihu.com/p/219718670)
+
+
+
+
 
 tensorflow 版本是 1.x。
 
@@ -64,3 +72,10 @@ tensorflow 版本是 1.x。
     ```
     python finetune_bert.py
     ```
+
+
+
+我的文章都会发布在公众号上，欢迎关注我的微信公众号
+
+<div align="center"><img src="https://image.zhangxiann.com/QRcode_8cm.jpg"/></div><br>
+

@@ -26,8 +26,8 @@ torch.manual_seed(seed)
 # set cuda
 use_cuda = torch.cuda.is_available()
 if use_cuda:
-    torch.cuda.set_device(gpu)
-    # device = torch.device("cuda", gpu)
+    # torch.cuda.set_device(gpu)
+    device = torch.device("cuda:0")
 else:
     device = torch.device("cpu")
 	
@@ -484,7 +484,7 @@ class Model(nn.Module):
         parameters.extend(list(filter(lambda p: p.requires_grad, self.out.parameters())))
 
         if use_cuda:
-            self.to(f'cuda:{model.device_ids[0]}')
+            self.to(device)
 
         if len(parameters) > 0:
             self.all_parameters["basic_parameters"] = parameters
@@ -752,8 +752,8 @@ epochs = 17
 early_stops = 3
 log_interval = 1
 
-test_batch_size = 256
-train_batch_size = 256
+test_batch_size = 32
+train_batch_size = 32
 
 save_model = osp.join(dir,'./finetune_bert.bin')
 save_test = osp.join(dir,'./test_result.csv')
@@ -970,10 +970,10 @@ class Trainer():
                     batch_masks[b, sent_idx, word_idx] = 1
 
         if use_cuda:
-            batch_inputs1 = batch_inputs1.to(f'cuda:{model.device_ids[0]}')
-            token_type_ids = token_type_ids.to(f'cuda:{model.device_ids[0]}')
-            batch_masks = batch_masks.to(f'cuda:{model.device_ids[0]}')
-            batch_labels = batch_labels.to(f'cuda:{model.device_ids[0]}')
+            batch_inputs1 = batch_inputs1.to(device)
+            token_type_ids = token_type_ids.to(device)
+            batch_masks = batch_masks.to(device)
+            batch_labels = batch_labels.to(device)
 
         return (batch_inputs1, token_type_ids, batch_masks), batch_labels
 
